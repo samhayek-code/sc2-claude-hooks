@@ -6,7 +6,15 @@ Choose your faction: **Terran**, **Protoss**, or **Zerg**.
 
 > *"Battlecruiser operational."* — every time you start a session
 
-## Quick Install
+## Install
+
+One-liner (no clone needed):
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/samhayek-code/sc2-claude-hooks/main/install.sh)
+```
+
+Or from the repo:
 
 ```bash
 git clone https://github.com/samhayek-code/sc2-claude-hooks.git
@@ -14,7 +22,7 @@ cd sc2-claude-hooks
 ./install.sh
 ```
 
-That's it. Start a new Claude Code session and you'll hear it.
+The installer will ask you to pick a faction. Start a new Claude Code session and you'll hear it.
 
 ## What It Does
 
@@ -159,11 +167,19 @@ The random picker will include them automatically.
 
 **Linux:** Swap `afplay` for `aplay`, `paplay`, or `mpv` in `sounds/play-random.sh`, then run `./install.sh --force`.
 
+## Uninstall
+
+```bash
+./uninstall.sh
+```
+
+Removes sounds, hooks from `settings.json`, and the error cooldown cache. Your other Claude Code settings are preserved.
+
 ## Credits
 
 - Sound effects sourced from [StarCraft Wiki](https://starcraft.fandom.com/wiki/StarCraft_Wiki) and [nuclearlaunchdetected.com](http://nuclearlaunchdetected.com)
 - StarCraft is a trademark of Blizzard Entertainment
-- Inspired by [Delba's tweet](https://x.com/delaboratory/status/1929237508283879556) about Claude Code sound hooks
+
 
 ## License
 
