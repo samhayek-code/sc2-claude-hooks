@@ -9,7 +9,7 @@ Choose your faction: **Terran** or **Protoss**.
 ## Quick Install
 
 ```bash
-git clone https://github.com/samhayek/sc2-claude-hooks.git
+git clone https://github.com/samhayek-code/sc2-claude-hooks.git
 cd sc2-claude-hooks
 ./install.sh
 ```
