@@ -27,14 +27,14 @@ Uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) t
 | Needs permission | `Notification` | Alert/request lines ("Nuclear launch detected", "Awaiting command") |
 | Error occurs | `PostToolUseFailure` | Resource warnings ("Not enough minerals", "Spawn more Overlords") |
 
-> **Note:** The error hook (`PostToolUseFailure`) fires on every tool failure, which can be frequent during normal operation. If it gets noisy, you can remove the `PostToolUseFailure` entry from your `~/.claude/settings.json` hooks.
+Error sounds are smart-filtered — they only fire on genuinely interesting failures (build errors, test failures, git conflicts, crashes, permission issues). Routine noise like `grep` no-match or `which` not-found is silenced. A 15-second cooldown prevents rapid-fire.
 
 ## Manual Install
 
 If you prefer not to run the installer:
 
 1. Copy the `sounds/` directory to `~/.claude/sounds/`
-2. Make scripts executable: `chmod +x ~/.claude/sounds/play-random.sh ~/.claude/sounds/set-faction.sh`
+2. Make scripts executable: `chmod +x ~/.claude/sounds/play-random.sh ~/.claude/sounds/play-error.sh ~/.claude/sounds/set-faction.sh`
 3. Create the faction symlink: `ln -s ~/.claude/sounds/terran ~/.claude/sounds/active`
 4. Copy the hooks from `hooks.json` into your `~/.claude/settings.json` under the `"hooks"` key
 
@@ -155,9 +155,9 @@ The random picker will include them automatically.
 
 - **macOS** — uses `afplay` for audio playback
 - **Claude Code** — with hooks support
-- **python3** — for the installer's settings merge (pre-installed on macOS)
+- **python3** — for the installer's settings merge and error filtering (pre-installed on macOS)
 
-Linux users: swap `afplay` for `aplay`, `paplay`, or `mpv` in `play-random.sh`.
+**Linux:** Swap `afplay` for `aplay`, `paplay`, or `mpv` in `sounds/play-random.sh`, then run `./install.sh --force`.
 
 ## Credits
 

@@ -7,10 +7,22 @@ set -e
 
 # -- Sanity checks ----------------------------------------------------------
 
+FORCE=false
+for arg in "$@"; do
+  [ "$arg" = "--force" ] && FORCE=true
+done
+
 if [[ "$(uname)" != "Darwin" ]]; then
-  echo "Warning: This installer is built for macOS (uses afplay)."
-  echo "On Linux, you'd need to swap afplay for aplay/paplay/mpv."
-  echo "Continuing anyway — sounds won't play until you patch play-random.sh."
+  echo "Error: This installer is built for macOS (uses afplay)."
+  echo ""
+  echo "On Linux, swap afplay for aplay/paplay/mpv in sounds/play-random.sh,"
+  echo "then re-run with --force:"
+  echo "  ./install.sh --force"
+  if [ "$FORCE" = false ]; then
+    exit 1
+  fi
+  echo ""
+  echo "Continuing with --force..."
 fi
 
 if ! command -v python3 &>/dev/null; then
@@ -65,65 +77,54 @@ fi
 cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup"
 echo "Backed up settings to $SETTINGS_FILE.backup"
 
-# Use python3 to safely deep-merge hooks into existing settings
+# Use python3 to deep-merge hooks into existing settings (preserves user's other hooks)
 python3 << 'PYEOF'
-import json, sys, os
+import json, os
 
 settings_path = os.path.expanduser("~/.claude/settings.json")
-hooks_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0] if len(sys.argv) > 0 else ".")), "hooks.json")
 
-# Read existing settings
 with open(settings_path, "r") as f:
     settings = json.load(f)
 
-# The hooks config to merge
-hooks = {
-    "SessionStart": [
-        {
-            "hooks": [
-                {
-                    "type": "command",
-                    "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/session-start"
-                }
-            ]
-        }
-    ],
-    "Stop": [
-        {
-            "hooks": [
-                {
-                    "type": "command",
-                    "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/task-complete"
-                }
-            ]
-        }
-    ],
-    "Notification": [
-        {
-            "matcher": "permission_prompt",
-            "hooks": [
-                {
-                    "type": "command",
-                    "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/needs-permission"
-                }
-            ]
-        }
-    ],
-    "PostToolUseFailure": [
-        {
-            "matcher": "Bash",
-            "hooks": [
-                {
-                    "type": "command",
-                    "command": "$HOME/.claude/sounds/play-error.sh"
-                }
-            ]
-        }
-    ]
+# SC2 hooks to add — one entry per event type
+sc2_hooks = {
+    "SessionStart": {
+        "hooks": [{"type": "command", "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/session-start"}]
+    },
+    "Stop": {
+        "hooks": [{"type": "command", "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/task-complete"}]
+    },
+    "Notification": {
+        "matcher": "permission_prompt",
+        "hooks": [{"type": "command", "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/needs-permission"}]
+    },
+    "PostToolUseFailure": {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "$HOME/.claude/sounds/play-error.sh"}]
+    },
 }
 
-# Merge — replace the hooks key entirely (our hooks are the full set)
-settings["hooks"] = hooks
+# Fingerprint: any hook command containing this string is ours
+SC2_MARKER = ".claude/sounds/"
+
+existing_hooks = settings.get("hooks", {})
+
+for event, sc2_entry in sc2_hooks.items():
+    entries = existing_hooks.get(event, [])
+
+    # Remove any previous SC2 entries (by matching command strings)
+    cleaned = []
+    for entry in entries:
+        cmds = [h.get("command", "") for h in entry.get("hooks", [])]
+        if any(SC2_MARKER in cmd for cmd in cmds):
+            continue  # drop old SC2 entry
+        cleaned.append(entry)
+
+    # Append the current SC2 entry
+    cleaned.append(sc2_entry)
+    existing_hooks[event] = cleaned
+
+settings["hooks"] = existing_hooks
 
 with open(settings_path, "w") as f:
     json.dump(settings, f, indent=2)
