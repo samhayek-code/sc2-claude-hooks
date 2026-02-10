@@ -19,5 +19,8 @@ if [ ${#files[@]} -eq 0 ]; then
   exit 0
 fi
 
+# Kill any currently playing sound so they don't overlap
+pkill -x afplay 2>/dev/null
+
 # Pick a random file and play it in the background
 afplay "${files[RANDOM % ${#files[@]}]}" &

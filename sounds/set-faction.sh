@@ -1,12 +1,12 @@
 #!/bin/bash
 # Switch the active sound faction for Claude Code hooks.
-# Usage: set-faction.sh <terran|protoss>
+# Usage: set-faction.sh <terran|protoss|zerg>
 
 SOUNDS_DIR="$HOME/.claude/sounds"
 FACTION="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
 
-if [ "$FACTION" != "terran" ] && [ "$FACTION" != "protoss" ]; then
-  echo "Usage: set-faction.sh <terran|protoss>"
+if [ "$FACTION" != "terran" ] && [ "$FACTION" != "protoss" ] && [ "$FACTION" != "zerg" ]; then
+  echo "Usage: set-faction.sh <terran|protoss|zerg>"
   echo "Current: $(readlink "$SOUNDS_DIR/active" 2>/dev/null || echo 'none')"
   exit 1
 fi

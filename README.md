@@ -2,7 +2,7 @@
 
 StarCraft 2 sound effects for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Plays random SC2 voice lines when things happen in your terminal — session starts, tasks complete, permission prompts, and errors.
 
-Choose your faction: **Terran** or **Protoss**.
+Choose your faction: **Terran**, **Protoss**, or **Zerg**.
 
 > *"Battlecruiser operational."* — every time you start a session
 
@@ -23,9 +23,11 @@ Uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) t
 | Event | Hook | What plays |
 |-------|------|------------|
 | Session starts | `SessionStart` | Unit ready lines ("Goliath online", "Carrier has arrived") |
-| Task completes | `Stop` | Completion confirmations ("Job's finished", "Upgrade complete") |
+| Task completes | `Stop` | Completion confirmations ("Job's finished", "Evolution complete") |
 | Needs permission | `Notification` | Alert/request lines ("Nuclear launch detected", "Awaiting command") |
-| Error occurs | `PostToolUseFailure` | Resource warnings ("Not enough minerals", "Construct additional pylons") |
+| Error occurs | `PostToolUseFailure` | Resource warnings ("Not enough minerals", "Spawn more Overlords") |
+
+> **Note:** The error hook (`PostToolUseFailure`) fires on every tool failure, which can be frequent during normal operation. If it gets noisy, you can remove the `PostToolUseFailure` entry from your `~/.claude/settings.json` hooks.
 
 ## Manual Install
 
@@ -39,8 +41,9 @@ If you prefer not to run the installer:
 ## Switch Factions
 
 ```bash
-~/.claude/sounds/set-faction.sh protoss
 ~/.claude/sounds/set-faction.sh terran
+~/.claude/sounds/set-faction.sh protoss
+~/.claude/sounds/set-faction.sh zerg
 ```
 
 ## Sound List
@@ -106,13 +109,44 @@ If you prefer not to run the installer:
 | | Need more minerals | `need-more-minerals.mp3` |
 | | Not enough energy | `not-enough-energy.mp3` |
 
+### Zerg (24 sounds)
+
+Zerg mixes advisor announcements with organic creature sounds — hisses, screeches, and chittering from Banelings, Lurkers, Hydralisks, and Mutalisks.
+
+| Event | Sound | File |
+|-------|-------|------|
+| **Session Start** | Baneling spawned | `baneling-spawned.mp3` |
+| | Baneling ready | `baneling-ready.mp3` |
+| | Lurker emerged | `lurker-emerged.mp3` |
+| | Egg hatched | `egg-hatched.mp3` |
+| | Egg hatched (variant) | `egg-hatched-2.mp3` |
+| **Task Complete** | Evolution complete | `evolution-complete.mp3` |
+| | Metamorphosis complete | `metamorphosis-complete.mp3` |
+| | Mutation complete | `mutation-complete.mp3` |
+| | New queen | `new-queen.mp3` |
+| | Baneling confirms | `baneling-confirms.mp3` |
+| | Lurker confirms | `lurker-confirms.mp3` |
+| **Needs Permission** | Base under attack | `base-under-attack.mp3` |
+| | Forces under attack | `forces-under-attack.mp3` |
+| | Ally under attack | `ally-under-attack.mp3` |
+| | Economy under attack | `economy-under-attack.mp3` |
+| | Calldown launch | `calldown-launch.mp3` |
+| | Hydralisk awaits | `hydralisk-awaits.mp3` |
+| | Lurker awaits | `lurker-awaits.mp3` |
+| | Mutalisk awaits | `mutalisk-awaits.mp3` |
+| **Error** | Build error | `build-error.mp3` |
+| | Need more gas | `need-more-gas.mp3` |
+| | Need more minerals | `need-more-minerals.mp3` |
+| | Not enough energy | `not-enough-energy.mp3` |
+| | Spawn more Overlords | `spawn-more-overlords.mp3` |
+
 ## Add Custom Sounds
 
 Drop any `.mp3` or `.m4a` file into the appropriate folder:
 
 ```
 ~/.claude/sounds/terran/session-start/my-custom-sound.mp3
-~/.claude/sounds/protoss/error/another-sound.m4a
+~/.claude/sounds/zerg/error/another-sound.mp3
 ```
 
 The random picker will include them automatically.
