@@ -33,10 +33,11 @@
     ],
     "PostToolUseFailure": [
       {
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/error"
+            "command": "$HOME/.claude/sounds/play-error.sh"
           }
         ]
       }

@@ -36,10 +36,11 @@ cp -R "$SCRIPT_DIR/sounds/terran" "$SOUNDS_DEST/"
 cp -R "$SCRIPT_DIR/sounds/protoss" "$SOUNDS_DEST/"
 cp -R "$SCRIPT_DIR/sounds/zerg" "$SOUNDS_DEST/"
 cp "$SCRIPT_DIR/sounds/play-random.sh" "$SOUNDS_DEST/"
+cp "$SCRIPT_DIR/sounds/play-error.sh" "$SOUNDS_DEST/"
 cp "$SCRIPT_DIR/sounds/set-faction.sh" "$SOUNDS_DEST/"
 
 # Make scripts executable
-chmod +x "$SOUNDS_DEST/play-random.sh" "$SOUNDS_DEST/set-faction.sh"
+chmod +x "$SOUNDS_DEST/play-random.sh" "$SOUNDS_DEST/play-error.sh" "$SOUNDS_DEST/set-faction.sh"
 
 # Create active symlink (default: terran) if it doesn't exist
 if [ ! -L "$SOUNDS_DEST/active" ]; then
@@ -110,10 +111,11 @@ hooks = {
     ],
     "PostToolUseFailure": [
         {
+            "matcher": "Bash",
             "hooks": [
                 {
                     "type": "command",
-                    "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/error"
+                    "command": "$HOME/.claude/sounds/play-error.sh"
                 }
             ]
         }
