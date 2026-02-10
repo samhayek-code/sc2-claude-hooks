@@ -1,0 +1,45 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/session-start"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/task-complete"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/needs-permission"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/error"
+          }
+        ]
+      }
+    ]
+  }
+}
