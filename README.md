@@ -184,3 +184,4 @@ Removes sounds, hooks from `settings.json`, and the error cooldown cache. Your o
 ## License
 
 MIT — the code, not the sounds. StarCraft audio is property of Blizzard Entertainment and included here for personal, non-commercial use under fair use.
+
