@@ -3,6 +3,9 @@
 # Usage: play-random.sh <directory>
 # Supports .mp3 and .m4a files.
 
+# Playback volume multiplier for afplay (1.0 = full, 0.5 = half).
+VOLUME="${SC2_VOLUME:-0.5}"
+
 dir="$1"
 if [ -z "$dir" ] || [ ! -d "$dir" ]; then
   exit 0
@@ -23,4 +26,4 @@ fi
 pkill -x afplay 2>/dev/null
 
 # Pick a random file and play it in the background
-afplay "${files[RANDOM % ${#files[@]}]}" &
+afplay -v "$VOLUME" "${files[RANDOM % ${#files[@]}]}" &
