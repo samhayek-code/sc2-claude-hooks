@@ -6,6 +6,8 @@ Choose your faction: **Terran**, **Protoss**, or **Zerg**.
 
 > *"Battlecruiser operational."* — every time you start a session
 
+> **Halo fan?** There's an expansion: [**halo-audio-hooks**](https://github.com/samhayek-code/halo-audio-hooks) — Cortana, 343 Guilty Spark, and Sgt. Johnson. Installs alongside this; switch across all packs with `set-faction.sh`.
+
 ## Install
 
 One-liner (no clone needed):
