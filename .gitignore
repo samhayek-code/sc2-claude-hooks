@@ -1,4 +1,24 @@
+# Editor / OS
+.DS_Store
 .claude/
 .entire/
 .venv/
 .scratch/
+__pycache__/
+*.pyc
+
+# Tooling working dirs / heavy or derived artifacts (never committed)
+_*backup/
+_*tmp/
+.originals/
+catalogs/
+tools/**/catalogs/
+
+# Tiberian Sun extraction spike (freeware game data, regenerated on demand)
+tibsun-spike/
+*.mix
+*.aud
+catalog.json
+ggml-*.bin
+named/
+w16/

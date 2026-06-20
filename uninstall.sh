@@ -1,5 +1,5 @@
 #!/bin/bash
-# SC2 Claude Hooks — Uninstaller
+# Claude Audio Hooks — Uninstaller
 # Removes sound files, hooks, and cache.
 
 set -e
@@ -146,5 +146,5 @@ echo -e "  ${GREEN}╚═══════════════════�
 echo -e "  ${DIM}\"Nuclear launch cancelled.\"${NC}"
 echo ""
 echo -e "  ${DIM}Reinstall anytime:${NC}"
-echo "    bash <(curl -fsSL https://raw.githubusercontent.com/samhayek-code/sc2-claude-hooks/main/install.sh)"
+echo "    bash <(curl -fsSL https://raw.githubusercontent.com/samhayek-code/claude-audio-hooks/main/install.sh)"
 echo ""

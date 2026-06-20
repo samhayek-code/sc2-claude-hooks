@@ -1,173 +1,148 @@
-# SC2 Claude Hooks
+# Claude Audio Hooks
 
-StarCraft 2 sound effects for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Plays random SC2 voice lines when things happen in your terminal — session starts, tasks complete, permission prompts, and errors.
+Game voice-line sound packs for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) event hooks. Plays a random line when a session starts, a task finishes, Claude asks for permission, or a command errors out — pulled from three franchises, switchable on a single symlink.
 
-Choose your faction: **Terran**, **Protoss**, or **Zerg**.
+**StarCraft 2** · **Halo** · **Tiberian Sun** — 8 packs, ~330 cleaned clips.
 
 > *"Battlecruiser operational."* — every time you start a session
-
-> **Halo fan?** There's an expansion: [**halo-audio-hooks**](https://github.com/samhayek-code/halo-audio-hooks) — Cortana, 343 Guilty Spark, and Sgt. Johnson. Installs alongside this; switch across all packs with `set-faction.sh`.
 
 ## Install
 
 One-liner (no clone needed):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/samhayek-code/sc2-claude-hooks/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/samhayek-code/claude-audio-hooks/main/install.sh)
 ```
 
 Or from the repo:
 
 ```bash
-git clone https://github.com/samhayek-code/sc2-claude-hooks.git
-cd sc2-claude-hooks
+git clone https://github.com/samhayek-code/claude-audio-hooks.git
+cd claude-audio-hooks
 ./install.sh
 ```
 
-The installer will ask you to pick a faction. Start a new Claude Code session and you'll hear it.
+Every pack installs; the installer just asks which one to start with. Begin a new Claude Code session and you'll hear it. Switch any time with `set-faction.sh`.
 
 ## What It Does
 
-Uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to trigger sound effects on four events:
+Uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to trigger sounds on four events:
 
 | Event | Hook | What plays |
 |-------|------|------------|
-| Session starts | `SessionStart` | Unit ready lines ("Goliath online", "Carrier has arrived") |
-| Task completes | `Stop` | Completion confirmations ("Job's finished", "Evolution complete") |
-| Needs permission | `Notification` | Alert/request lines ("Nuclear launch detected", "Awaiting command") |
-| Error occurs | `PostToolUseFailure` | Resource warnings ("Not enough minerals", "Spawn more Overlords") |
+| Session starts | `SessionStart` | Unit-ready / greeting lines |
+| Task completes | `Stop` | Completion confirmations |
+| Needs permission | `Notification` | Alert / awaiting-orders lines |
+| Error occurs | `PostToolUseFailure` | Resource warnings / panic lines |
 
-Error sounds are smart-filtered — they only fire on genuinely interesting failures (build errors, test failures, git conflicts, crashes, permission issues). Routine noise like `grep` no-match or `which` not-found is silenced. A 15-second cooldown prevents rapid-fire.
+Error sounds are smart-filtered — they only fire on genuinely interesting failures (build errors, test failures, git conflicts, crashes, permission issues). Routine noise like `grep` no-match or `which` not-found is silenced, and a 15-second cooldown prevents rapid-fire.
 
-## Manual Install
+The mechanism is pack-agnostic: every pack is a folder of four event buckets (`session-start`, `task-complete`, `needs-permission`, `error`), and `play-random.sh` picks a random clip from the active pack's bucket. The `active` symlink decides which pack plays.
 
-If you prefer not to run the installer:
+## The Packs
 
-1. Copy the `sounds/` directory to `~/.claude/sounds/`
-2. Make scripts executable: `chmod +x ~/.claude/sounds/play-random.sh ~/.claude/sounds/play-error.sh ~/.claude/sounds/set-faction.sh`
-3. Create the faction symlink: `ln -s ~/.claude/sounds/terran ~/.claude/sounds/active`
-4. Copy the hooks from `hooks.json` into your `~/.claude/settings.json` under the `"hooks"` key
+| Pack | Franchise | Voices | Clips |
+|------|-----------|--------|-------|
+| `terran` | StarCraft 2 | Terran advisor + units | 28 |
+| `protoss` | StarCraft 2 | Protoss advisor + units | 23 |
+| `zerg` | StarCraft 2 | Zerg advisor + creature sounds | 24 |
+| `cortana` | Halo | Cortana (Halo 2/3) | 80 |
+| `guilty-spark` | Halo | 343 Guilty Spark (Halo 3) | 48 |
+| `sergeant-johnson` | Halo | Sgt. Johnson | 47 |
+| `gdi` | Tiberian Sun | EVA announcer + GDI units | 40 |
+| `nod` | Tiberian Sun | CABAL + Nod units | 40 |
 
-## Switch Factions
+<details>
+<summary><b>StarCraft 2 — full sound lists</b></summary>
+
+### Terran (28)
+Session start: Battlecruiser operational · Goliath online · Marine ready · Raven online · Siege tank ready
+Task complete: Add-on complete · Ghost reporting · Job confirmed · Job's finished · Research complete · Salvage complete · Upgrade complete
+Needs permission: Base under attack · Calldown launch · Forces under attack · Go ahead TacCom · Incoming orders · Nuclear strike · Nuke ready · Say the word · Standing by · What's your call?
+Error: Build error · Construction interrupted · Need more gas · Need more supply · Not enough energy · Not enough minerals
+
+### Protoss (23)
+Session start: Carrier has arrived · Dark Templar ready · High Templar ready · I return to serve · Prismatic core online
+Task complete: Merging is complete · Processed · Research complete · Upgrade complete · Warp-in complete
+Needs permission: Awaiting command · Base under attack · Calldown launch · Command me · Fire at will Commander · Forces under attack · Input command · Standing by
+Error: Build error · Construct additional pylons · Need more gas · Need more minerals · Not enough energy
+
+### Zerg (24)
+Mixes advisor announcements with organic creature sounds — hisses, screeches, and chittering from Banelings, Lurkers, Hydralisks, and Mutalisks.
+Session start: Baneling spawned · Baneling ready · Lurker emerged · Egg hatched (×2)
+Task complete: Evolution complete · Metamorphosis complete · Mutation complete · New queen · Baneling confirms · Lurker confirms
+Needs permission: Base / Forces / Ally / Economy under attack · Calldown launch · Hydralisk awaits · Lurker awaits · Mutalisk awaits
+Error: Build error · Need more gas · Need more minerals · Not enough energy · Spawn more Overlords
+</details>
+
+<details>
+<summary><b>Halo</b></summary>
+
+| Pack | Character |
+|------|-----------|
+| `cortana` | Cortana (Halo 2/3) |
+| `guilty-spark` | 343 Guilty Spark (Halo 3) |
+| `sergeant-johnson` | Sgt. Johnson |
+
+Voice clips sourced from [101soundboards](https://www.101soundboards.com) and cleaned (see [How the audio was made](#how-the-audio-was-made)).
+</details>
+
+<details>
+<summary><b>Tiberian Sun</b></summary>
+
+| Pack | Voices | Sample |
+|------|--------|--------|
+| `gdi` | EVA announcer + GDI units | *"Construction complete." · "Ion cannon ready." · "Awaiting orders."* |
+| `nod` | CABAL + Nod units | *"Your probability of success is insignificant and dropping." · "By your command."* |
+
+Each pack blends its faction's announcer with its unit voices, the way the game layers them. `needs-permission` gets the units literally awaiting your command; `error` gets panic and menace. CABAL has no congratulatory line, so on `task-complete` he turns dark-ironic (*"Defeat of enemy predicted in T-minus 3, 2, 1."*) while his cyborgs report *"Executing."*
+</details>
+
+## Switch Voices
 
 ```bash
-~/.claude/sounds/set-faction.sh terran
-~/.claude/sounds/set-faction.sh protoss
-~/.claude/sounds/set-faction.sh zerg
+~/.claude/sounds/set-faction.sh protoss          # StarCraft 2
+~/.claude/sounds/set-faction.sh cortana          # Halo
+~/.claude/sounds/set-faction.sh nod              # Tiberian Sun
 ```
 
-## Sound List
-
-### Terran (28 sounds)
-
-| Event | Sound | File |
-|-------|-------|------|
-| **Session Start** | Battlecruiser operational | `battlecruiser-operational.mp3` |
-| | Goliath online | `goliath-online.m4a` |
-| | Marine ready | `marine-ready.mp3` |
-| | Raven online | `raven-online.mp3` |
-| | Siege tank ready | `siege-tank-ready.mp3` |
-| **Task Complete** | Add-on complete | `addon-complete.mp3` |
-| | Ghost reporting | `ghost-reporting.m4a` |
-| | Job confirmed | `job-confirmed.m4a` |
-| | Job's finished | `jobs-finished.mp3` |
-| | Research complete | `research-complete.mp3` |
-| | Salvage complete | `salvage-complete.mp3` |
-| | Upgrade complete | `upgrade-complete.mp3` |
-| **Needs Permission** | Base under attack | `base-under-attack.mp3` |
-| | Calldown launch | `calldown-launch.mp3` |
-| | Forces under attack | `forces-under-attack.mp3` |
-| | Go ahead, TacCom | `go-ahead-taccom.m4a` |
-| | Incoming orders | `incoming-orders.m4a` |
-| | Nuclear strike | `nuclear-strike.mp3` |
-| | Nuke ready | `nuke-ready.mp3` |
-| | Say the word | `say-the-word.m4a` |
-| | Standing by | `standing-by.m4a` |
-| | What's your call? | `whats-your-call.m4a` |
-| **Error** | Build error | `build-error.mp3` |
-| | Construction interrupted | `construction-interrupted.mp3` |
-| | Need more gas | `need-more-gas.mp3` |
-| | Need more supply | `need-more-supply.mp3` |
-| | Not enough energy | `not-enough-energy.mp3` |
-| | Not enough minerals | `not-enough-minerals.mp3` |
-
-### Protoss (23 sounds)
-
-| Event | Sound | File |
-|-------|-------|------|
-| **Session Start** | Carrier has arrived | `carrier-has-arrived.mp3` |
-| | Dark Templar ready | `dark-templar-ready.mp3` |
-| | High Templar ready | `high-templar-ready.mp3` |
-| | I return to serve | `i-return-to-serve.mp3` |
-| | Prismatic core online | `prismatic-core-online.mp3` |
-| **Task Complete** | Merging is complete | `merging-is-complete.m4a` |
-| | Processed | `processed.m4a` |
-| | Research complete | `research-complete.mp3` |
-| | Upgrade complete | `upgrade-complete.mp3` |
-| | Warp-in complete | `warp-in-complete.mp3` |
-| **Needs Permission** | Awaiting command | `awaiting-command.m4a` |
-| | Base under attack | `base-under-attack.mp3` |
-| | Calldown launch | `calldown-launch.mp3` |
-| | Command me | `command-me.m4a` |
-| | Fire at will, Commander | `fire-at-will-commander.m4a` |
-| | Forces under attack | `forces-under-attack.mp3` |
-| | Input command | `input-command.m4a` |
-| | Standing by | `standing-by.m4a` |
-| **Error** | Build error | `build-error.mp3` |
-| | Construct additional pylons | `construct-additional-pylons.mp3` |
-| | Need more gas | `need-more-gas.mp3` |
-| | Need more minerals | `need-more-minerals.mp3` |
-| | Not enough energy | `not-enough-energy.mp3` |
-
-### Zerg (24 sounds)
-
-Zerg mixes advisor announcements with organic creature sounds — hisses, screeches, and chittering from Banelings, Lurkers, Hydralisks, and Mutalisks.
-
-| Event | Sound | File |
-|-------|-------|------|
-| **Session Start** | Baneling spawned | `baneling-spawned.mp3` |
-| | Baneling ready | `baneling-ready.mp3` |
-| | Lurker emerged | `lurker-emerged.mp3` |
-| | Egg hatched | `egg-hatched.mp3` |
-| | Egg hatched (variant) | `egg-hatched-2.mp3` |
-| **Task Complete** | Evolution complete | `evolution-complete.mp3` |
-| | Metamorphosis complete | `metamorphosis-complete.mp3` |
-| | Mutation complete | `mutation-complete.mp3` |
-| | New queen | `new-queen.mp3` |
-| | Baneling confirms | `baneling-confirms.mp3` |
-| | Lurker confirms | `lurker-confirms.mp3` |
-| **Needs Permission** | Base under attack | `base-under-attack.mp3` |
-| | Forces under attack | `forces-under-attack.mp3` |
-| | Ally under attack | `ally-under-attack.mp3` |
-| | Economy under attack | `economy-under-attack.mp3` |
-| | Calldown launch | `calldown-launch.mp3` |
-| | Hydralisk awaits | `hydralisk-awaits.mp3` |
-| | Lurker awaits | `lurker-awaits.mp3` |
-| | Mutalisk awaits | `mutalisk-awaits.mp3` |
-| **Error** | Build error | `build-error.mp3` |
-| | Need more gas | `need-more-gas.mp3` |
-| | Need more minerals | `need-more-minerals.mp3` |
-| | Not enough energy | `not-enough-energy.mp3` |
-| | Spawn more Overlords | `spawn-more-overlords.mp3` |
+`set-faction.sh` auto-discovers any pack folder in `~/.claude/sounds/`, so all three franchises coexist; the `active` symlink selects which one plays. Run it with no argument to list what's installed.
 
 ## Add Custom Sounds
 
-Drop any `.mp3` or `.m4a` file into the appropriate folder:
+Drop any `.mp3` or `.m4a` into the matching event bucket:
 
 ```
-~/.claude/sounds/terran/session-start/my-custom-sound.mp3
-~/.claude/sounds/zerg/error/another-sound.mp3
+~/.claude/sounds/terran/session-start/my-sound.mp3
+~/.claude/sounds/cortana/error/another.mp3
 ```
 
-The random picker will include them automatically.
+The random picker includes them automatically. A whole new pack is just a folder with the four event buckets.
+
+## How the Audio Was Made
+
+The clips ship clean. Two pipelines live under [`tools/`](./tools), kept per-franchise.
+
+**StarCraft 2 / Halo — soundboard cleaning** ([`tools/halo`](./tools/halo)). Raw 101soundboards rips carry two artifacts before each line: an in-game radio **ping** (5–6 fixed variants) and a spoken **"101soundboards" plug**.
+- `fadefix.py` — trims leading dead air, adds a 10 ms fast-attack fade-in (kills the startup click).
+- `cluster.py` — groups clip openings by cross-correlation to separate the recurring ping variants from real speech, so first words are never cut.
+- `debeep.py` / `unified2.py` — strip the ping and the plug, then dedup lines that landed in two buckets.
+
+Requires `numpy` + `ffmpeg`. Detection is acoustic, verified by ear.
+
+**Tiberian Sun — extraction from freeware game data** ([`tools/tiberian-sun`](./tools/tiberian-sun), full writeup in its [README](./tools/tiberian-sun/README.md)). These are the original game clips, pulled on macOS without Windows tools (Tiberian Sun has been EA freeware since 2010).
+- `extract_mix.py` — parses the Westwood "new format" MIX archive into raw `.AUD` files.
+- `hashtest.py` — recovers canonical filenames by hashing each name against the embedded mix database; the `i`/`n` letter splits GDI from Nod.
+- `ffmpeg` decodes Westwood ADPCM (`wsaud` / `adpcm_ima_ws`); [whisper.cpp](https://github.com/ggerganov/whisper.cpp) transcribes the corpus for bucket sorting.
+- `build_pack.sh` + `*.manifest` — trim, loudness-normalize, click-guard, encode to mp3.
 
 ## Requirements
 
-- **macOS** — uses `afplay` for audio playback
+- **macOS** — uses `afplay` for playback
 - **Claude Code** — with hooks support
 - **python3** — for the installer's settings merge and error filtering (pre-installed on macOS)
 
-**Linux:** Swap `afplay` for `aplay`, `paplay`, or `mpv` in `sounds/play-random.sh`, then run `./install.sh --force`.
+**Linux:** swap `afplay` for `aplay`, `paplay`, or `mpv` in `sounds/play-random.sh`, then run `./install.sh --force`.
 
 ## Uninstall
 
@@ -175,15 +150,15 @@ The random picker will include them automatically.
 ./uninstall.sh
 ```
 
-Removes sounds, hooks from `settings.json`, and the error cooldown cache. Your other Claude Code settings are preserved.
+Removes the sounds, the hooks from `settings.json`, and the error cooldown cache. Your other Claude Code settings are preserved.
 
 ## Credits
 
-- Sound effects sourced from [StarCraft Wiki](https://starcraft.fandom.com/wiki/StarCraft_Wiki) and [nuclearlaunchdetected.com](http://nuclearlaunchdetected.com)
-- StarCraft is a trademark of Blizzard Entertainment
+- **StarCraft 2** — audio sourced from [StarCraft Wiki](https://starcraft.fandom.com/wiki/StarCraft_Wiki) and [nuclearlaunchdetected.com](http://nuclearlaunchdetected.com). StarCraft © Blizzard Entertainment.
+- **Halo** — voice clips via [101soundboards](https://www.101soundboards.com). Halo, Cortana, 343 Guilty Spark, and Sgt. Johnson are trademarks of Microsoft / 343 Industries; franchise created by Bungie.
+- **Tiberian Sun** — clips and franchise © Electronic Arts / Westwood Studios; game data via the [CnCNet](https://cncnet.org/tiberian-sun) community client (EA freeware); transcription by [whisper.cpp](https://github.com/ggerganov/whisper.cpp).
+- Cover art is AI-generated fan art.
 
+## License & Disclaimer
 
-## License
-
-MIT — the code, not the sounds. StarCraft audio is property of Blizzard Entertainment and included here for personal, non-commercial use under fair use.
-
+MIT — **the code and tooling, not the audio**. The voice clips are the property of their respective rights holders (Blizzard Entertainment; Microsoft / 343 Industries; Electronic Arts / Westwood Studios) and are included here for personal, non-commercial, fan use only. This project is unofficial and not affiliated with or endorsed by any of them. If you represent a rights holder and want clips removed, open an issue and they'll be taken down.

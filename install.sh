@@ -1,6 +1,6 @@
 #!/bin/bash
-# SC2 Claude Hooks — Interactive Installer
-# StarCraft 2 sound effects for Claude Code.
+# Claude Audio Hooks — Interactive Installer
+# Game voice-line sound packs for Claude Code event hooks.
 # macOS only (uses afplay for audio playback).
 
 set -e
@@ -22,6 +22,23 @@ print_success() { echo -e "  ${GREEN}✓${NC} $1"; }
 print_warning() { echo -e "  ${YELLOW}⚠${NC} $1"; }
 print_error()   { echo -e "  ${RED}✗${NC} $1"; }
 
+# ── Pack catalog (parallel arrays — macOS bash 3.2 compatible) ───────────────
+# Order defines the menu numbering. All packs are deployed; the pick only sets
+# the starting active pack. set-faction.sh switches between them afterward.
+
+PACKS=(terran protoss zerg cortana guilty-spark sergeant-johnson gdi nod)
+PACK_GAMES=("StarCraft 2" "StarCraft 2" "StarCraft 2" "Halo" "Halo" "Halo" "Tiberian Sun" "Tiberian Sun")
+PACK_TAGS=(
+  "Terran  — \"Battlecruiser operational\""
+  "Protoss — \"Carrier has arrived\""
+  "Zerg    — \"Evolution complete\""
+  "Cortana — \"I've got it under control\""
+  "Guilty Spark — \"Greetings\""
+  "Sgt. Johnson — \"Oorah!\""
+  "GDI / EVA — \"Construction complete\""
+  "Nod / CABAL — \"By your command\""
+)
+
 # ── Flags ───────────────────────────────────────────────────────────────────
 
 FORCE=false
@@ -32,13 +49,8 @@ done
 # ── Header ──────────────────────────────────────────────────────────────────
 
 echo ""
-echo -e "${CYAN}  ███████╗ ██████╗ ██████╗ ${NC}"
-echo -e "${CYAN}  ██╔════╝██╔════╝ ╚════██╗${NC}"
-echo -e "${CYAN}  ███████╗██║       █████╔╝${NC}"
-echo -e "${CYAN}  ╚════██║██║      ██╔═══╝ ${NC}"
-echo -e "${CYAN}  ███████║╚██████╗ ███████╗${NC}"
-echo -e "${CYAN}  ╚══════╝ ╚═════╝ ╚══════╝${NC}"
-echo -e "  ${DIM}Sound effects for Claude Code${NC}"
+echo -e "${CYAN}  ▟▙ Claude Audio Hooks${NC}"
+echo -e "  ${DIM}Game voice lines for Claude Code — StarCraft 2 · Halo · Tiberian Sun${NC}"
 echo ""
 
 # ── Requirements ────────────────────────────────────────────────────────────
@@ -86,7 +98,7 @@ else
   SOURCE_DIR=$(mktemp -d)
   trap "rm -rf '$SOURCE_DIR'" EXIT
 
-  curl -fsSL https://github.com/samhayek-code/sc2-claude-hooks/archive/main.tar.gz \
+  curl -fsSL https://github.com/samhayek-code/claude-audio-hooks/archive/main.tar.gz \
     | tar xz -C "$SOURCE_DIR" --strip-components=1 \
     || { print_error "Download failed"; exit 1; }
 
@@ -94,34 +106,43 @@ else
   echo ""
 fi
 
-# ── Faction picker ──────────────────────────────────────────────────────────
+# ── Pack picker ─────────────────────────────────────────────────────────────
 
-echo -e "  ${CYAN}┌─────────────────────────────────────────────┐${NC}"
-echo -e "  ${CYAN}│${NC}  ${BOLD}SELECT YOUR FACTION${NC}                        ${CYAN}│${NC}"
-echo -e "  ${CYAN}├─────────────────────────────────────────────┤${NC}"
-echo -e "  ${CYAN}│${NC}                                             ${CYAN}│${NC}"
-echo -e "  ${CYAN}│${NC}   ${BOLD}[1]${NC} Terran  — ${DIM}\"Battlecruiser operational\"${NC} ${CYAN}│${NC}"
-echo -e "  ${CYAN}│${NC}   ${BOLD}[2]${NC} Protoss — ${DIM}\"Carrier has arrived\"${NC}      ${CYAN}│${NC}"
-echo -e "  ${CYAN}│${NC}   ${BOLD}[3]${NC} Zerg    — ${DIM}\"Evolution complete\"${NC}        ${CYAN}│${NC}"
-echo -e "  ${CYAN}│${NC}                                             ${CYAN}│${NC}"
-echo -e "  ${CYAN}└─────────────────────────────────────────────┘${NC}"
+echo -e "  ${CYAN}┌──────────────────────────────────────────────────────┐${NC}"
+echo -e "  ${CYAN}│${NC}  ${BOLD}PICK A STARTING VOICE${NC}  ${DIM}(all packs install; switch later)${NC}  ${CYAN}│${NC}"
+echo -e "  ${CYAN}└──────────────────────────────────────────────────────┘${NC}"
+echo ""
+prev_game=""
+i=0
+while [ $i -lt ${#PACKS[@]} ]; do
+  game="${PACK_GAMES[$i]}"
+  if [ "$game" != "$prev_game" ]; then
+    echo -e "  ${DIM}${game}${NC}"
+    prev_game="$game"
+  fi
+  echo -e "    ${BOLD}[$((i + 1))]${NC} ${PACK_TAGS[$i]}"
+  i=$((i + 1))
+done
 echo ""
 
 # Handle interactive vs piped stdin (curl | bash)
 if [ -t 0 ]; then
-  read -p "  Enter choice [1-3, default=1]: " FACTION_CHOICE
+  read -p "  Enter choice [1-${#PACKS[@]}, default=1]: " PACK_CHOICE
 else
-  FACTION_CHOICE=$(bash -c 'read -p "  Enter choice [1-3, default=1]: " c < /dev/tty && echo "$c"' 2>/dev/null) || {
-    FACTION_CHOICE="1"
+  PACK_CHOICE=$(bash -c 'read -p "  Enter choice [1-8, default=1]: " c < /dev/tty && echo "$c"' 2>/dev/null) || {
+    PACK_CHOICE="1"
     echo -e "  ${DIM}Non-interactive mode — defaulting to Terran${NC}"
   }
 fi
 
-case "$FACTION_CHOICE" in
-  2) FACTION="protoss" ;;
-  3) FACTION="zerg" ;;
-  *) FACTION="terran" ;;
+# Validate: numeric and within range, else default to first pack
+case "$PACK_CHOICE" in
+  ''|*[!0-9]*) PACK_CHOICE=1 ;;
 esac
+if [ "$PACK_CHOICE" -lt 1 ] || [ "$PACK_CHOICE" -gt ${#PACKS[@]} ]; then
+  PACK_CHOICE=1
+fi
+ACTIVE_PACK="${PACKS[$((PACK_CHOICE - 1))]}"
 
 echo ""
 
@@ -130,15 +151,16 @@ echo ""
 SOUNDS_DEST="$CLAUDE_DIR/sounds"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
-# ── Copy sounds ─────────────────────────────────────────────────────────────
+# ── Copy sounds (all packs) ─────────────────────────────────────────────────
 
 print_step "Deploying sounds..."
 mkdir -p "$SOUNDS_DEST"
 
-for faction_dir in terran protoss zerg; do
-  cp -R "$SOURCE_DIR/sounds/$faction_dir" "$SOUNDS_DEST/"
-  count=$(find "$SOUNDS_DEST/$faction_dir" \( -name '*.mp3' -o -name '*.m4a' \) | wc -l | tr -d ' ')
-  print_success "$faction_dir ($count sounds)"
+for pack in "${PACKS[@]}"; do
+  [ -d "$SOURCE_DIR/sounds/$pack" ] || continue
+  cp -R "$SOURCE_DIR/sounds/$pack" "$SOUNDS_DEST/"
+  count=$(find "$SOUNDS_DEST/$pack" \( -name '*.mp3' -o -name '*.m4a' \) | wc -l | tr -d ' ')
+  print_success "$pack ($count sounds)"
 done
 
 # ── Install scripts ─────────────────────────────────────────────────────────
@@ -150,12 +172,12 @@ cp "$SOURCE_DIR/sounds/set-faction.sh" "$SOUNDS_DEST/"
 chmod +x "$SOUNDS_DEST/play-random.sh" "$SOUNDS_DEST/play-error.sh" "$SOUNDS_DEST/set-faction.sh"
 print_success "play-random.sh, play-error.sh, set-faction.sh"
 
-# ── Set faction ─────────────────────────────────────────────────────────────
+# ── Set active pack ─────────────────────────────────────────────────────────
 
-print_step "Setting faction to: $FACTION"
+print_step "Setting active voice to: $ACTIVE_PACK"
 rm -f "$SOUNDS_DEST/active"
-ln -s "$SOUNDS_DEST/$FACTION" "$SOUNDS_DEST/active"
-print_success "Active faction: $FACTION"
+ln -s "$SOUNDS_DEST/$ACTIVE_PACK" "$SOUNDS_DEST/active"
+print_success "Active voice: $ACTIVE_PACK"
 
 # ── Merge hooks into settings.json ──────────────────────────────────────────
 
@@ -177,8 +199,8 @@ settings_path = os.path.expanduser("~/.claude/settings.json")
 with open(settings_path, "r") as f:
     settings = json.load(f)
 
-# SC2 hooks — one entry per event type
-sc2_hooks = {
+# Event hooks — one entry per event type
+audio_hooks = {
     "SessionStart": {
         "hooks": [{"type": "command", "command": "$HOME/.claude/sounds/play-random.sh $HOME/.claude/sounds/active/session-start"}]
     },
@@ -196,23 +218,23 @@ sc2_hooks = {
 }
 
 # Fingerprint: any hook command containing this string is ours
-SC2_MARKER = ".claude/sounds/"
+MARKER = ".claude/sounds/"
 
 existing_hooks = settings.get("hooks", {})
 
-for event, sc2_entry in sc2_hooks.items():
+for event, entry in audio_hooks.items():
     entries = existing_hooks.get(event, [])
 
-    # Remove any previous SC2 entries (by matching command strings)
+    # Remove any previous entries of ours (by matching command strings)
     cleaned = []
-    for entry in entries:
-        cmds = [h.get("command", "") for h in entry.get("hooks", [])]
-        if any(SC2_MARKER in cmd for cmd in cmds):
-            continue  # drop old SC2 entry
-        cleaned.append(entry)
+    for e in entries:
+        cmds = [h.get("command", "") for h in e.get("hooks", [])]
+        if any(MARKER in cmd for cmd in cmds):
+            continue  # drop old entry
+        cleaned.append(e)
 
-    # Append the current SC2 entry
-    cleaned.append(sc2_entry)
+    # Append the current entry
+    cleaned.append(entry)
     existing_hooks[event] = cleaned
 
 settings["hooks"] = existing_hooks
@@ -232,22 +254,28 @@ echo -e "  ${GREEN}╔═══════════════════�
 echo -e "  ${GREEN}║${NC}         ${BOLD}INSTALLATION COMPLETE${NC}              ${GREEN}║${NC}"
 echo -e "  ${GREEN}╚═════════════════════════════════════════════╝${NC}"
 
-# Faction-specific flavor
-case "$FACTION" in
-  terran)  echo -e "  ${DIM}\"Adjutant online. All systems nominal.\"${NC}" ;;
-  protoss) echo -e "  ${DIM}\"En taro Adun.\"${NC}" ;;
-  zerg)    echo -e "  ${DIM}\"The Swarm grows stronger.\"${NC}" ;;
+# Pack-specific flavor
+case "$ACTIVE_PACK" in
+  terran)           echo -e "  ${DIM}\"Adjutant online. All systems nominal.\"${NC}" ;;
+  protoss)          echo -e "  ${DIM}\"En taro Adun.\"${NC}" ;;
+  zerg)             echo -e "  ${DIM}\"The Swarm grows stronger.\"${NC}" ;;
+  cortana)          echo -e "  ${DIM}\"I've got it under control.\"${NC}" ;;
+  guilty-spark)     echo -e "  ${DIM}\"Greetings. I am the Monitor of Installation 04.\"${NC}" ;;
+  sergeant-johnson) echo -e "  ${DIM}\"Oorah! Let's move, people.\"${NC}" ;;
+  gdi)              echo -e "  ${DIM}\"GDI forces deployed.\"${NC}" ;;
+  nod)              echo -e "  ${DIM}\"By your command.\"${NC}" ;;
 esac
 
 echo ""
-echo -e "  ${CYAN}Switch factions:${NC}"
-echo "    ~/.claude/sounds/set-faction.sh protoss"
+echo -e "  ${CYAN}Switch voices${NC} ${DIM}(any of: ${PACKS[*]})${NC}:"
+echo "    ~/.claude/sounds/set-faction.sh cortana"
+echo "    ~/.claude/sounds/set-faction.sh nod"
 echo ""
 echo -e "  ${CYAN}Test it:${NC}"
 echo "    ~/.claude/sounds/play-random.sh ~/.claude/sounds/active/session-start"
 echo ""
 echo -e "  ${CYAN}Add custom sounds:${NC}"
-echo "    Drop .mp3/.m4a files into ~/.claude/sounds/<faction>/<event>/"
+echo "    Drop .mp3/.m4a files into ~/.claude/sounds/<pack>/<event>/"
 echo ""
 echo -e "  ${CYAN}Uninstall:${NC}"
 echo "    ./uninstall.sh"
